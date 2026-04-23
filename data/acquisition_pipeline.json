@@ -1,0 +1,11 @@
+{
+  "users": {
+    "YOUR_CHAT_ID_HERE": {
+      "source": "direct",
+      "user_id": "YOUR_CHAT_ID_HERE",
+      "stage": "joined_telegram",
+      "messages_sent": ["onboard1"],
+      "conversion_status": "engaged"
+    }
+  }
+}

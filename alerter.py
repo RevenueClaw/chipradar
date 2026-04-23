@@ -1,0 +1,146 @@
+import requests
+import yaml
+import json
+import os
+import time
+from datetime import datetime, timedelta
+from db import get_db
+from scorer import compute_scores, days_since_first_seen, get_baseline, get_historical_median
+
+USERS_FILE = 'data/users.json'
+REFERRALS_FILE = 'data/referrals.json'
+SHAREABLE_EVENTS_FILE = 'data/shareable_events.json'
+DAILY_ALERTS_FILE = 'data/daily_alerts.json'
+SUPPRESSED_LOG = 'data/logs/suppressed_alerts.log'
+REVENUE_METRICS_FILE = 'data/revenue_funnel_metrics.json'
+CONVERSION_PERF_FILE = 'data/conversion_performance.json'
+
+def load_json(file_path, default=None):
+    if default is None:
+        default = {}
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as f:
+            return json.load(f)
+    return default
+
+def save_json(file_path, data):
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    with open(file_path, 'w') as f:
+        json.dump(data, f, indent=2)
+
+def load_telegram_config():
+    with open('config/sources.yaml', 'r') as f:
+        config = yaml.safe_load(f)
+    return config['telegram']
+
+def get_or_create_user(telegram_id):
+    users = load_json(USERS_FILE)
+    if telegram_id not in users:
+        users[telegram_id] = {
+            "telegram_id": telegram_id,
+            "tier": "free",
+            "alerts_seen": 0,
+            "high_value_alerts_seen": 0,
+            "converted": False,
+            "referral_code": f"{telegram_id}-REF",
+            "invited_by": None,
+            "conversion_heat_score": 0,
+            "last_activity": datetime.now().isoformat(),
+            "conversion_window_start": None,
+            "hours_since_first_exposure": 0,
+            "conversion_deadline": None,
+            "conversion_attempts": 0,
+            "conversion_reliability_score": 0,
+            "last_active_hour": "",
+            "peak_engagement_window": "",
+            "alerts_opened_pattern": []
+        }
+        save_json(USERS_FILE, users)
+    return users, users[telegram_id]
+
+def send_telegram_alert(bot_token, chat_id, message):
+    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    payload = {"chat_id": chat_id, "text": message, "parse_mode": "HTML"}
+    try:
+        resp = requests.post(url, json=payload, timeout=10)
+        print(f"Telegram sent: {resp.status_code}")
+        return resp.status_code == 200
+    except Exception as e:
+        print(f"Telegram fail: {e}")
+        return False
+
+def check_and_alert():
+    tg = load_telegram_config()
+    chat_id = tg['chat_id']
+    users, user = get_or_create_user(chat_id)
+    
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT p.id, p.sku, p.name, p.price_usd, p.availability, p.seller, p.url, p.confidence
+        FROM products p ORDER BY p.normalized_at DESC LIMIT 5
+    """)
+    products = cursor.fetchall()
+    conn.close()
+    
+    for prod in products:
+        prod_id, sku, name, price, avail, seller, url, conf_score = prod[:8]
+        product_tuple = (sku, name, price, avail, seller, url, conf_score)
+        final_score, conf_score, reason = compute_scores(product_tuple)
+        
+        # Aggregate canonical data
+        conn = get_db()
+        c = conn.cursor()
+        c.execute('SELECT * FROM canonical_products WHERE confidence_score >= 0.6 ORDER BY updated_at DESC LIMIT 1')
+        canonical = c.fetchone()
+        conn.close()
+        if canonical:
+            obj = {
+                'family': canonical[1],
+                'sources': json.loads(canonical[3]),
+                'price_stats': json.loads(canonical[4]),
+                'confidence_score': canonical[5]
+            }
+            in_stock_sources = [s for s in obj['sources'] if s['availability'] == 'in_stock']
+            cheapest = min(in_stock_sources, key=lambda s: s['price']) if in_stock_sources else None
+            alternatives = [s for s in in_stock_sources if s['price'] > cheapest['price'] * 1.05]
+            spread = obj['price_stats']['spread_percent']
+            scarcity = 'high' if len(in_stock_sources) <= 2 else 'low'
+            message = f"""
+🚨 <b>TIME-SENSITIVE HARDWARE SIGNAL</b>
+
+<b>1. PRODUCT HEADER</b>
+Family: {obj['family']}
+Memory: {obj['variant']['memory_gb']}GB
+
+<b>2. MARKET STATE</b>
+In-stock sources: {len(in_stock_sources)}
+Out-of-stock: {len(obj['sources']) - len(in_stock_sources)}
+
+<b>3. BEST OPTION</b>
+Cheapest: ${cheapest['price']:.0f} ({cheapest['source_name']}, Tier {cheapest.get('tier', '?')})
+
+<b>4. ALTERNATIVES (>5% higher)</b>
+{len(alternatives)} options
+{chr(10).join([f"- ${s['price']:.0f} {s['source_name']}" for s in alternatives[:3]])}
+
+<b>5. MARKET INSIGHT</b>
+Spread: {spread:.1f}%
+Scarcity: {scarcity}
+Conf: {obj['confidence_score']:.2f}
+
+<b>6. ACTION</b>
+Buy now at cheapest Tier source before stock dries up.
+            """.strip()
+        else:
+            message = 'No canonical high-conf products ready.'
+        
+        sent = send_telegram_alert(tg['bot_token'], chat_id, message)
+        print(f"Alert sent to {chat_id}: {name} score={final_score}")
+        if sent:
+            break  # one test alert
+    
+    print("TEST ALERT COMPLETE")
+
+if __name__ == "__main__":
+    check_and_alert()

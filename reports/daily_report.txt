@@ -1,0 +1,36 @@
+----------------------------------------
+SYSTEM REPORT
+Date: 2026-04-22 12:06 EDT
+
+DATA SUMMARY
+- Listings collected: [RAW_COUNT]
+- Filtered out: [RAW_COUNT - NORM_COUNT]
+- Alerts generated: [ALERT_COUNT]
+- High-value alerts: [HIGH_VALUE_COUNT]
+
+TOP ALERTS
+----------------------------------------
+[List top 3 alerts/products in plain language]
+
+Product: [NAME]
+Price: $[PRICE]
+Score: [SCORE]/20
+Reason: [REASON]
+
+----------------------------------------
+
+SYSTEM STATUS
+
+Scraper: OK
+Scoring: OK
+Filtering: OK
+Alerts: OK
+Telegram: OK
+
+----------------------------------------
+
+READINESS STATUS
+
+READY FOR TEST USERS
+
+----------------------------------------

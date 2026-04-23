@@ -1,0 +1,11 @@
+[
+  {
+    "alert_id": "pimoroni_pi5_001",
+    "passes_scarcity_test": true,
+    "passes_price_test": true,
+    "passes_timing_test": true,
+    "passes_clarity_test": true,
+    "passes_actionability_test": true,
+    "overall_quality_score": 5
+  }
+]

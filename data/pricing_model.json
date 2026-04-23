@@ -1,0 +1,19 @@
+{
+  "tiers": {
+    "entry": {
+      "price": "$5/month",
+      "features": ["delayed alerts", "limited volume", "basic reasoning"]
+    },
+    "core": {
+      "price": "$10/month",
+      "features": ["real-time alerts", "full reasoning", "scarcity detection"]
+    },
+    "power": {
+      "price": "$20/month",
+      "features": ["instant alerts", "highest confidence", "earliest detection"]
+    }
+  },
+  "recommended_price": "$10",
+  "reasoning": "Core tier balances value and accessibility for builders tracking scarcity.",
+  "target_user_type": "builder"
+}

@@ -1,0 +1,9 @@
+Product Name: AI Hardware Alerts
+
+Value Proposition: Real-time alerts for in-stock AI hardware (RPi5, Rock5B, RTX 4070/4090) at pay-worthy prices, scored 0-20.
+
+Free Tier: 5 alerts/day, basic signals.
+Paid Tier ($10/mo): Unlimited, priority high-score (>=14), custom products.
+
+Onboarding Flow:
+User joins Telegram → receives free alerts → sees value (e.g. Pi5 $80 in-stock) → upgrade offered via reply prompts → manual tier upgrade → full access.

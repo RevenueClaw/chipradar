@@ -1,0 +1,11 @@
+{
+  "YOUR_CHAT_ID_HERE": {
+    "user_id": "YOUR_CHAT_ID_HERE",
+    "alerts_seen": 5,
+    "high_value_alerts_seen": 2,
+    "conversion_prompt_sent": true,
+    "converted": false,
+    "dropoff_point": "price_resistance",
+    "likely_reason": "high_value_seen but no conversion → price resistance OR unclear urgency"
+  }
+}

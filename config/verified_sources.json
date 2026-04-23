@@ -1,0 +1,10 @@
+[
+  {
+    "name": "pimoroni",
+    "domain": "shop.pimoroni.com",
+    "endpoint": "/products.json",
+    "product_count": 30,
+    "sample_title": "Assembled Adafruit FeatherWing OLED - 128x64 OLED Add-on - STEMMA QT / Qwiic",
+    "status": "valid"
+  }
+]

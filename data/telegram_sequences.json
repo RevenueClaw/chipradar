@@ -1,0 +1,14 @@
+[
+  {
+    "id": "onboard1",
+    "text": "You're in. You'll start receiving hardware availability alerts shortly. These are real-time signals from live sources—not summaries or scraped deals."
+  },
+  {
+    "id": "after_first_alert",
+    "text": "You just received your first alert. This system only sends signals when: - real stock is detected - pricing is within normal range - confidence is high. This is what people miss manually."
+  },
+  {
+    "id": "after_high_value",
+    "text": "That last alert was a high-confidence opportunity. If you're actively tracking hardware, speed matters here. Free tier is delayed—premium gives instant detection."
+  }
+]

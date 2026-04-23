@@ -1,0 +1,32 @@
+{
+  "targets": [
+    {
+      "platform": "reddit",
+      "community": "r/raspberry_pi",
+      "post_ready": true,
+      "engagement_count": 0,
+      "users_contacted": 0
+    },
+    {
+      "platform": "reddit",
+      "community": "r/homelab",
+      "post_ready": true,
+      "engagement_count": 0,
+      "users_contacted": 0
+    },
+    {
+      "platform": "reddit",
+      "community": "r/LocalLLaMA",
+      "post_ready": true,
+      "engagement_count": 0,
+      "users_contacted": 0
+    },
+    {
+      "platform": "reddit",
+      "community": "r/SBCs",
+      "post_ready": true,
+      "engagement_count": 0,
+      "users_contacted": 0
+    }
+  ]
+}

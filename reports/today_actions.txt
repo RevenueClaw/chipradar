@@ -1,0 +1,14 @@
+----------------------------------------
+
+TODAY'S ACTION PLAN
+
+1. Review top alerts manually (none qualified yet)
+2. Confirm at least 1 high-confidence alert (0 current; normalizer fix needed for pimoroni Pi5 $79.95)
+3. If valid:
+ - begin Reddit outreach (manual)
+4. Monitor alert output for next 6–12 hours (run daemon after fixes)
+
+Priority:
+Only act if alerts feel time-sensitive and valuable (current: low stock signals absent)
+
+----------------------------------------

@@ -1,0 +1,38 @@
+# Products to monitor
+products:
+  raspberry_pi_5:
+    name: "Raspberry Pi 5"
+    variants: ["4GB", "8GB"]
+    baseline_price_usd: 60
+    tier: 1
+
+  raspberry_pi_4:
+    name: "Raspberry Pi 4"
+    variants: ["2GB", "4GB", "8GB"]
+    baseline_price_usd: 45
+    tier: 1
+
+  radxa_rock_5b:
+    name: "Radxa Rock 5B"
+    variants: ["8GB", "16GB"]
+    baseline_price_usd: 150
+    tier: 1
+
+  orange_pi_5:
+    name: "Orange Pi 5"
+    variants: ["4GB", "8GB", "16GB", "32GB"]
+    baseline_price_usd: 80
+    tier: 1
+
+  jetson_orin:
+    name: "Jetson Orin"
+    variants: ["8GB", "16GB", "32GB"]
+    baseline_price_usd: 500
+    tier: 1
+
+memory_preferences:
+  - "32GB"
+  - "16GB"
+  - "8GB"
+  - "4GB"
+strict_mode: false

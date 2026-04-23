@@ -1,0 +1,20 @@
+{
+  "positioning": "This is a real-time scarcity intelligence system for AI hardware availability.",
+  "tiers": {
+    "entry": {
+      "price": "$5/mo",
+      "features": ["delayed alerts", "limited frequency", "awareness tier"]
+    },
+    "core": {
+      "price": "$10/mo",
+      "features": ["real-time alerts", "full reasoning", "scarcity detection"],
+      "default": true
+    },
+    "power": {
+      "price": "$20/mo",
+      "features": ["fastest alerts", "highest confidence", "priority window"]
+    }
+  },
+  "mrr_target": "$100-500",
+  "rules": "Never < $5, never > $20, default $10. Emphasize time saved vs missed opportunity."
+}

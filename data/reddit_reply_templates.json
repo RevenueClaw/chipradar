@@ -1,0 +1,10 @@
+[
+  {
+    "type": "initial_hook",
+    "text": "I ended up building a small real-time alert system because I kept missing SBC / GPU restocks. It filters out junk listings and only triggers when actual stock appears with non-scalped pricing. If you want, I can add you to the test group."
+  },
+  {
+    "type": "follow_up",
+    "text": "Cool—I'll send you access. It runs through Telegram since it's the fastest way to deliver alerts in real time."
+  }
+]

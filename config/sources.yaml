@@ -1,0 +1,70 @@
+# Data sources for collector (REAL ONLY)
+sources:
+  - name: raspberrypi_official_products
+    url: "https://www.raspberrypi.com/products/"
+    type: "html"
+    category: "raspberry_pi_5"
+    tier: 1
+
+  - name: pimoroni_shopify_json
+    url: "https://shop.pimoroni.com/products.json"
+    type: "json"
+    category: "raspberry_pi_5"
+    tier: 1
+
+  - name: orangepi_official
+    url: "http://www.orangepi.org/html/hardWare/computerAndMicrocontrollers/details/Orange-Pi-5.html"
+    type: "html"
+    category: "orange_pi_5"
+    tier: 1
+
+  - name: radxa_rock5b
+    url: "https://radxa.com/products/rock5/rock5b"
+    type: "html"
+    category: "radxa_rock_5b"
+    tier: 1
+
+  - name: nvidia_jetson_orin
+    url: "https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/"
+    type: "html"
+    category: "jetson_orin"
+    tier: 1
+
+  - name: seeedstudio_rock5b
+    url: "https://www.seeedstudio.com/Rock-5B-p-5947.html"
+    type: "html"
+    category: "radxa_rock_5b"
+    tier: 1
+
+  - name: amazon_radxa_rock5b
+    url: "https://www.amazon.com/s?k=radxa+rock+5b"
+    type: "html"
+    category: "radxa_rock_5b"
+    tier: 2
+
+  - name: amazon_orange_pi5
+    url: "https://www.amazon.com/s?k=orange+pi+5"
+    type: "html"
+    category: "orange_pi_5"
+    tier: 2
+
+  - name: aliexpress_rock5b
+    url: "https://www.aliexpress.com/w/wholesale-radxa-rock-5b.html"
+    type: "html"
+    tier: 2
+
+  - name: allnetchina_rock5b
+    url: "https://www.allnetchina.com/search.php?keywords=rock+5b"
+    type: "html"
+    tier: 3
+
+telegram:
+  bot_token: "8716034046:AAFyorpRNUArRxs4Vxa-K-VnhFTX9yvC4BE"
+  chat_id: "8645083973"
+
+memory_preferences:
+  - "32GB"
+  - "16GB"
+  - "8GB"
+  - "4GB"
+strict_mode: false

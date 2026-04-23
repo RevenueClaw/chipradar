@@ -1,0 +1,9 @@
+{
+  "source_tiers": {
+    "tier1": ["raspberrypi.com", "pimoroni.com", "orangepi.org", "radxa.com", "nvidia.com/jetson-orin", "seeedstudio.com"],
+    "tier2": ["amazon.com", "aliexpress.com"],
+    "tier3": ["allnetchina.com"]
+  },
+  "memory_preferences": ["32GB", "16GB", "8GB", "4GB"],
+  "strict_mode": false
+}

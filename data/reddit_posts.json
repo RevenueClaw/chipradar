@@ -1,0 +1,20 @@
+[
+  {
+    "title": "I built a real-time AI hardware alert system because I kept missing Raspberry Pi / GPU restocks",
+    "body": "I kept missing SBC and GPU restocks by minutes or hours, especially for things like Raspberry Pi / Radxa / RTX cards.\n\nSo I built a small system that:\n- detects real stock availability (not fake listings)\n- filters out overpriced/scalper inventory\n- only alerts when confidence is high\n\nExample alert:\n\n🚨 HARDWARE OPPORTUNITY\nRadxa Rock 5B 32GB\nScore: 18/20\nAt MSRP, official stock detected\n\nWhy it matters:\n- first restock in weeks\n- no scalper markup\n- verified source\n\nI’m currently testing it with a small group of users.\n\nIf you want early access, I can add a few testers.",
+    "target_community": "r/raspberry_pi",
+    "conversion_hook": "Reply 'ALERT ME' for beta access"
+  },
+  {
+    "title": "Real-time alerts for homelab SBC restocks - caught Pi5 drop today",
+    "body": "[similar body with homelab angle]",
+    "target_community": "r/homelab",
+    "conversion_hook": "DM for Telegram beta"
+  },
+  {
+    "title": "GPU/SBC availability intel - no more scalper FOMO",
+    "body": "[LocalLLaMA angle]",
+    "target_community": "r/LocalLLaMA",
+    "conversion_hook": "Free early alerts"
+  }
+]

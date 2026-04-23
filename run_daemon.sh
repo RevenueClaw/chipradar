@@ -1,0 +1,1 @@
+#!/bin/bash\ncd $(dirname $0)\n./venv/bin/python main.py
