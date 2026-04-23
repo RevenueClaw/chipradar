@@ -133,13 +133,33 @@ def optimize_buy(family: str, memory_gb: Optional[int] = None, goal: str = 'chea
     urgency = "high" if deal_score_best >= 4 else "medium" if deal_score_best == 3 else "low"
     insight = f"Save ${round(msrp_best - best['price'], 0)} vs MSRP — lowest price available now" if msrp_best and best['price'] < msrp_best else "Strong availability signal"
 
+    # Primary result card for first-lookup UI
+    primary_card = {
+        'family': family,
+        'variant': best.get('variant', 'Unknown'),
+        'best_available': True,
+        'price': best['price'],
+        'source': best['source'],
+        'deal_quality': {
+            'rating': deal_rating_best,
+            'score': f"{deal_score_best}/10",
+            'emoji': get_deal_emoji(deal_rating_best)
+        },
+        'confidence': best.get('confidence', 0),
+        'in_stock': best.get('availability') == 'in_stock',
+        'msrp_delta': f"+${round(best['price'] - msrp_best, 0)} ({round(((best['price'] - msrp_best)/msrp_best*100), 0)}%)" if msrp_best else 'N/A',
+        'action_url': best.get('url')
+    }
+
     return {
         'query': f'{family}-{goal}',
+        'primary_card': primary_card,
         'best_option': best,
         'alternatives': alternatives,
         'market_summary': compute_market_summary(valid_items),
         'insight': insight,
-        'urgency': urgency
+        'urgency': urgency,
+        'explore_prompt': "Want to compare other deals or variants? See cheapest across sellers, track drops, check restocks. [Explore More]"
     }
 
 if __name__ == '__main__':

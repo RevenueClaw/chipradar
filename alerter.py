@@ -6,7 +6,10 @@ import time
 from datetime import datetime, timedelta
 from db import get_db
 from scorer import compute_scores, days_since_first_seen, get_baseline, get_historical_median
-from data.msrp_baseline import get_msrp, parse_memory_gb, compute_deal_score, get_deal_emoji
+from data.msrp_baseline import get_msrp, parse_memory_gb, compute_deal_score, get_deal_emoji, compute_heat_score
+
+import sqlite3
+from datetime import datetime, timedelta
 
 USERS_FILE = 'data/users.json'
 REFERRALS_FILE = 'data/referrals.json'
@@ -132,6 +135,15 @@ def check_and_alert():
             deal_emoji = get_deal_emoji(deal_rating)
             msrp_delta_str = f"{((cheapest['price'] - msrp)/msrp*100):+.0f}%" if msrp and cheapest else "N/A"
 
+            # Guardrail check for user targets
+            for v in preferred_variants:
+                if v.get('family') == family and v.get('memory_gb') == memory_gb:
+                    max_price = v.get('max_price')
+                    if max_price and max_price < msrp:
+                        expectation_delta = (max_price - msrp) / msrp if msrp else 0
+                        expectation_msg = get_expectation_msg(expectation_delta)
+                        print(expectation_msg)  # Log warning for now
+
             # Savings
             saved_vs_msrp = (msrp - cheapest['price']) if msrp and cheapest and cheapest['price'] < msrp else 0
             market_avg = obj['price_stats'].get('avg_price', cheapest['price'] if cheapest else 0)
@@ -149,21 +161,28 @@ def check_and_alert():
 
             target_msg = "\n🎯 Your target hit!" if target_hit else ""
 
+            # First-lookup hierarchy format
+            deal_quality_str = f"{deal_emoji} {deal_rating.upper()} ({deal_score}/10)"
             message = f"""
-🔥 <b>{family} {memory_gb}GB — IN STOCK</b>
+<b>{family} ({memory_gb}GB)</b>
 
-💰 Price: ${cheapest['price']:.0f}
-🏷 MSRP: ${msrp:.0f} ({msrp_delta_str})
-🏪 Source: {cheapest['source_name']}
-📊 Confidence: {obj['confidence_score']:.2f}
+🔥 <b>Best Available Now</b>
 
-{deal_emoji} Deal: {deal_rating.upper()}
-{savings_msg}{target_msg}
+<b>${cheapest['price']:.0f} — {cheapest['source_name']}</b>
 
-⚡ Why this matters:
-{why_matters}
+{deal_quality_str}
 
-👉 Buy now: {cheapest.get('url', 'N/A')}
+Confidence: {obj['confidence_score']:.2f}
+In-stock: Yes
+
+{msrp_delta_str}
+
+[ Buy Now: {cheapest.get('url', 'N/A')} ]
+
+---
+
+<b>Want more?</b>
+{explore_prompt if 'explore_prompt' in locals() else 'See alternatives, history, restocks below.'}
             """.strip()
         else:
             message = 'No canonical high-conf products ready.'
