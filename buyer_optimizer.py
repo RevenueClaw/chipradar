@@ -80,10 +80,10 @@ def compute_market_summary(items: List[Dict]) -> Dict:
         'variant': variant_str
     }
 
-def optimize_buy(family: str, goal: str = 'cheapest') -> Dict[str, Any]:
-    """Main entry: best_option from MARKET_FEED."""
-    market_feed = get_market_feed()
-    valid_items = filter_valid_items(market_feed, family)
+def optimize_buy(family: str, memory_gb: Optional[int] = None, goal: str = 'cheapest') -> Dict[str, Any]:
+    """Main entry: best_option from MARKET_FEED for specific variant if memory_gb provided."""
+    market_feed = get_market_feed(memory_gb)
+    valid_items = filter_valid_items(market_feed, family, memory_gb)
     ranked_items = rank_items(valid_items, goal)
     
     if not ranked_items:
@@ -112,13 +112,34 @@ def optimize_buy(family: str, goal: str = 'cheapest') -> Dict[str, Any]:
         'balanced': f"Balanced score ({best['confidence']:.2f} conf + low price)"
     }
     
+    # Compute deal score for best
+    memory_gb_best = best.get('memory_gb')
+    msrp_best = get_msrp(best.get('family', 'Unknown'), memory_gb_best) if memory_gb_best else None
+    deal_rating_best, deal_score_best = compute_deal_score(best.get('price'), msrp_best, best.get('confidence', 0))
+    best['deal_rating'] = deal_rating_best
+    best['msrp_delta_pct'] = ((best.get('price') - msrp_best) / msrp_best) if msrp_best and best.get('price') else None
+
+    # For alternatives
+    for alt in alternatives:
+        memory_gb_alt = alt.get('memory_gb')
+        msrp_alt = get_msrp(alt.get('family', 'Unknown'), memory_gb_alt) if memory_gb_alt else None
+        deal_rating_alt, _ = compute_deal_score(alt.get('price'), msrp_alt, alt.get('confidence', 0))
+        alt['deal_rating'] = deal_rating_alt
+        alt['msrp_delta_pct'] = ((alt.get('price') - msrp_alt) / msrp_alt) if msrp_alt and alt.get('price') else None
+
     best['reason'] = reason_map.get(goal, 'Best per criteria')
     
+    # Insight and urgency
+    urgency = "high" if deal_score_best >= 4 else "medium" if deal_score_best == 3 else "low"
+    insight = f"Save ${round(msrp_best - best['price'], 0)} vs MSRP — lowest price available now" if msrp_best and best['price'] < msrp_best else "Strong availability signal"
+
     return {
         'query': f'{family}-{goal}',
         'best_option': best,
         'alternatives': alternatives,
-        'market_summary': compute_market_summary(valid_items)
+        'market_summary': compute_market_summary(valid_items),
+        'insight': insight,
+        'urgency': urgency
     }
 
 if __name__ == '__main__':

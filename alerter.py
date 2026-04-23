@@ -6,6 +6,7 @@ import time
 from datetime import datetime, timedelta
 from db import get_db
 from scorer import compute_scores, days_since_first_seen, get_baseline, get_historical_median
+from data.msrp_baseline import get_msrp, parse_memory_gb, compute_deal_score, get_deal_emoji
 
 USERS_FILE = 'data/users.json'
 REFERRALS_FILE = 'data/referrals.json'
@@ -73,6 +74,8 @@ def check_and_alert():
     tg = load_telegram_config()
     chat_id = tg['chat_id']
     users, user = get_or_create_user(chat_id)
+    preferred_variants = user.get('preferred_variants', [])
+    price_targets = {v['family']: v.get('max_price') for v in preferred_variants if 'max_price' in v}
     
     conn = get_db()
     cursor = conn.cursor()
@@ -87,6 +90,20 @@ def check_and_alert():
         prod_id, sku, name, price, avail, seller, url, conf_score = prod[:8]
         product_tuple = (sku, name, price, avail, seller, url, conf_score)
         final_score, conf_score, reason = compute_scores(product_tuple)
+
+        # Variant filter
+        memory_gb_prod = parse_memory_gb(name)
+        if preferred_variants:
+            variant_match = any(
+                v.get('family') == 'all' or v.get('family') == family.lower() and v.get('memory_gb') == memory_gb_prod for v in preferred_variants
+            )
+            if not variant_match:
+                continue
+        
+        # Price target filter
+        max_price = price_targets.get(family.lower())
+        if max_price and price > max_price and not (msrp and price <= msrp):
+            continue
         
         # Aggregate canonical data
         conn = get_db()
@@ -106,31 +123,47 @@ def check_and_alert():
             alternatives = [s for s in in_stock_sources if s['price'] > cheapest['price'] * 1.05]
             spread = obj['price_stats']['spread_percent']
             scarcity = 'high' if len(in_stock_sources) <= 2 else 'low'
+
+            # Deal score for cheapest
+            family = obj['family']
+            memory_gb = obj.get('memory_gb', parse_memory_gb(obj.get('family', '')))
+            msrp = get_msrp(family, memory_gb)
+            deal_rating, deal_score = compute_deal_score(cheapest['price'] if cheapest else None, msrp, obj['confidence_score'])
+            deal_emoji = get_deal_emoji(deal_rating)
+            msrp_delta_str = f"{((cheapest['price'] - msrp)/msrp*100):+.0f}%" if msrp and cheapest else "N/A"
+
+            # Savings
+            saved_vs_msrp = (msrp - cheapest['price']) if msrp and cheapest and cheapest['price'] < msrp else 0
+            market_avg = obj['price_stats'].get('avg_price', cheapest['price'] if cheapest else 0)
+            saved_vs_market = (market_avg - cheapest['price']) if market_avg > cheapest['price'] else 0
+
+            target_hit = any(v.get('memory_gb') == memory_gb and v.get('max_price', float('inf')) >= cheapest['price'] for v in preferred_variants)
+
+            why_matters = "Near MSRP restock — these sell out fast." if msrp and cheapest['price'] <= msrp * 1.2 else "Lowest price seen in last 48h."
+
+            savings_msg = ""
+            if saved_vs_msrp > 0:
+                savings_msg += f"\n💸 Save ${saved_vs_msrp:.0f} vs MSRP"
+            if saved_vs_market > 0:
+                savings_msg += f"\n💸 Save ${saved_vs_market:.0f} vs market"
+
+            target_msg = "\n🎯 Your target hit!" if target_hit else ""
+
             message = f"""
-🚨 <b>TIME-SENSITIVE HARDWARE SIGNAL</b>
+🔥 <b>{family} {memory_gb}GB — IN STOCK</b>
 
-<b>1. PRODUCT HEADER</b>
-Family: {obj['family']}
-Memory: {obj['variant']['memory_gb']}GB
+💰 Price: ${cheapest['price']:.0f}
+🏷 MSRP: ${msrp:.0f} ({msrp_delta_str})
+🏪 Source: {cheapest['source_name']}
+📊 Confidence: {obj['confidence_score']:.2f}
 
-<b>2. MARKET STATE</b>
-In-stock sources: {len(in_stock_sources)}
-Out-of-stock: {len(obj['sources']) - len(in_stock_sources)}
+{deal_emoji} Deal: {deal_rating.upper()}
+{savings_msg}{target_msg}
 
-<b>3. BEST OPTION</b>
-Cheapest: ${cheapest['price']:.0f} ({cheapest['source_name']}, Tier {cheapest.get('tier', '?')})
+⚡ Why this matters:
+{why_matters}
 
-<b>4. ALTERNATIVES (>5% higher)</b>
-{len(alternatives)} options
-{chr(10).join([f"- ${s['price']:.0f} {s['source_name']}" for s in alternatives[:3]])}
-
-<b>5. MARKET INSIGHT</b>
-Spread: {spread:.1f}%
-Scarcity: {scarcity}
-Conf: {obj['confidence_score']:.2f}
-
-<b>6. ACTION</b>
-Buy now at cheapest Tier source before stock dries up.
+👉 Buy now: {cheapest.get('url', 'N/A')}
             """.strip()
         else:
             message = 'No canonical high-conf products ready.'
