@@ -2,7 +2,7 @@
 import json
 from typing import Dict, List, Any, Optional
 from routing_layer import get_market_feed  # Loads MARKET_FEED
-from data.msrp_baseline import MSRP_BASELINE  # Assume exists or inline
+from data.msrp_baseline import get_msrp, parse_memory_gb
 
 # Static source reliability (for fastest mode only)
 SOURCE_RELIABILITY = {
@@ -10,15 +10,6 @@ SOURCE_RELIABILITY = {
     'official_vendor': 1.0,
     'shopify': 0.7,
     'unknown_store': 0.4
-}
-
-# MSRP baseline (inline for self-contained)
-MSRP_BASELINE = {
-    'Raspberry Pi 5': 69.99,
-    'Raspberry Pi 4': 55.00,
-    'Rock 5B': 119.00,
-    'Orange Pi 5': 89.00,
-    'Jetson Orin Nano': 499.00
 }
 
 def filter_valid_items(market_feed: List[Dict], family: str) -> List[Dict]:
@@ -67,13 +58,26 @@ def compute_market_summary(items: List[Dict]) -> Dict:
         return {'price_range': {'min': None, 'max': None}, 'avg_markup_pct': None, 'sources_count': 0}
     
     prices = [i['price'] for i in items if i['price']]
-    msrp = MSRP_BASELINE.get(items[0]['family'], None)
-    avg_markup = ((sum(prices)/len(prices) - msrp)/msrp * 100) if prices and msrp else None
-    
+
+    valid_markups = []
+    for item in items:
+        memory_gb = parse_memory_gb(item.get('variant', item.get('name', '')))
+        msrp_item = get_msrp(item.get('family', 'Unknown'), memory_gb) if memory_gb else None
+        if msrp_item and item['price']:
+            markup = ((item['price'] - msrp_item) / msrp_item) * 100
+            valid_markups.append(markup)
+
+    avg_markup = sum(valid_markups) / len(valid_markups) if valid_markups else None
+
+    memory_gb = parse_memory_gb(items[0].get('variant', items[0].get('name', ''))) if items else None
+    variant_str = f"{memory_gb}GB" if memory_gb else None
+
     return {
-        'price_range': {'min': min(prices), 'max': max(prices)},
+        'price_range': {'min': min(prices) if prices else None, 'max': max(prices) if prices else None},
         'avg_markup_pct': round(avg_markup, 2) if avg_markup else None,
-        'sources_count': len(set(i['source'] for i in items))
+        'sources_count': len(set(i['source'] for i in items)),
+        'memory_gb': memory_gb,
+        'variant': variant_str
     }
 
 def optimize_buy(family: str, goal: str = 'cheapest') -> Dict[str, Any]:
@@ -91,7 +95,16 @@ def optimize_buy(family: str, goal: str = 'cheapest') -> Dict[str, Any]:
         }
     
     best = ranked_items[0]
+    # Add variant info to best
+    memory_gb = parse_memory_gb(best.get('variant', best.get('name', '')))
+    best['memory_gb'] = memory_gb
+    best['variant'] = f"{memory_gb}GB" if memory_gb else None
+
     alternatives = ranked_items[1:4]  # Up to 3
+    for alt in alternatives:
+        memory_gb_alt = parse_memory_gb(alt.get('variant', alt.get('name', '')))
+        alt['memory_gb'] = memory_gb_alt
+        alt['variant'] = f"{memory_gb_alt}GB" if memory_gb_alt else None
     
     reason_map = {
         'cheapest': f"Lowest price (${best['price']}) + high conf ({best['confidence']})",

@@ -7,14 +7,7 @@ from db import get_db
 
 logger = logging.getLogger(__name__)
 
-# MSRP reference (per family)
-MSRP_BASELINE = {
-    "Raspberry Pi 5": 69.99,
-    "Raspberry Pi 4": 55.00,
-    "Rock 5B": 119.00,
-    "Orange Pi 5": 89.00,
-    "Jetson Orin Nano": 499.00
-}
+from data.msrp_baseline import get_msrp
 
 # Authorized sources (official + authorized retailers)
 AUTHORIZED_SOURCES = {"official_vendor", "authorized_retailer"}
@@ -86,15 +79,20 @@ def route_canonical_trends():
         
         # Parse source distribution
         source_dist = get_source_distribution(source_dist_str)
-        msrp = MSRP_BASELINE.get(family)
+        memory_gb = None  # Variant data pending in canonical_trends
+        msrp = get_msrp(family, memory_gb)
         markup_pct = calculate_markup_pct(avg_price, msrp)
         majority_source = get_majority_source(source_dist)
         has_strong_majority = has_strong_signal_majority(source_dist)
         
         # Market feed: baseline inclusion (confidence >= 0.5)
+        memory_gb = None  # Parse from canonical_trends when added
+        variant_str = None
         market_entry = {
             "feed": "market",
             "family": family,
+            "memory_gb": memory_gb,
+            "variant": variant_str,
             "signal": "availability",
             "price_range": {"min": min_price, "max": max_price},
             "avg_markup": f"{markup_pct:.1f}%" if markup_pct is not None else None,
@@ -117,9 +115,13 @@ def route_canonical_trends():
         )
         
         if restock_eligible:
+            memory_gb = None  # Parse from canonical_trends when added
+            variant_str = None
             restock_entry = {
                 "feed": "restock",
                 "family": family,
+                "memory_gb": memory_gb,
+                "variant": variant_str,
                 "signal": "restock",
                 "price": avg_price,
                 "confidence": avg_conf,
