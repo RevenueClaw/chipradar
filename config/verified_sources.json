@@ -6,5 +6,21 @@
     "product_count": 30,
     "sample_title": "Assembled Adafruit FeatherWing OLED - 128x64 OLED Add-on - STEMMA QT / Qwiic",
     "status": "valid"
+  },
+  {
+    "name": "thepihut",
+    "domain": "thepihut.com",
+    "endpoint": "/products.json",
+    "product_count": 200,
+    "sample_title": "Argon Industria HMI 10CS - 10\\\" Touch Display + Enclosure for Pi 5",
+    "status": "valid"
+  },
+  {
+    "name": "thepihut-rpi5",
+    "domain": "thepihut.com",
+    "endpoint": "/collections/raspberry-pi-5/products.json",
+    "product_count": 10,
+    "sample_title": "Raspberry Pi 5",
+    "status": "valid"
   }
 ]

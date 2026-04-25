@@ -31,27 +31,31 @@ def normalize_raw_data(raw_record):
     # 1. Official Raspberry Pi HTML (BeautifulSoup)
     if 'raspberrypi_official_products' in source_name:
         soup = BeautifulSoup(content, 'html.parser')
-        product_tiles = soup.find_all(['h2', 'h3', 'a'], class_=re.compile(r'product|tile|card', re.I))
-        log(f"  → Found {len(product_tiles)} potential products")
-        
-        keywords = ['pi 5', 'rpi5', 'pi5', 'raspberry pi 5', 'raspberry pi 4', 'rock 5b', 'radxa', 'orange pi', 'orange pi 5', 'orange pi 5 plus', 'jetson', 'jetson nano', 'jetson orin']
-        for tile in product_tiles[:10]:
-            name = tile.get_text(strip=True)
-            if any(kw in name.lower() for kw in keywords):
-                link = tile.get('href', raw_data['url'])
-                if link.startswith('/'):
-                    link = 'https://www.raspberrypi.com' + link
+        # Better selectors for Raspberry Pi products page
+        product_links = soup.find_all('a', href=True)
+        log(f"  → Found {len(product_links)} links, scanning for products")
+        keywords = ['pi 5', 'rpi5', 'pi5', 'raspberry pi 5', 'raspberry pi 4', 'pi 4', 'raspberry-pi-5', 'raspberrypi5']
+        matched = 0
+        for a in product_links[:50]:
+            href = a.get('href', '')
+            if not href.startswith('http') and href.startswith('/'):
+                href = 'https://www.raspberrypi.com' + href
+            text = a.get_text(strip=True).lower()
+            if any(kw in text or kw.replace(' ', '-') in text for kw in keywords):
+                name = a.get_text(strip=True)[:100]
+                if len(name) < 5: continue  # skip junk
                 products.append({
-                    'sku': f"rpi_official_{name[:30].replace(' ', '_')}",
+                    'sku': f"rpi_official_{matched}_{name[:20].replace(' ', '_').replace('/', '_')}",
                     'name': name,
                     'price_usd': None,
-                    'availability': 'unknown',
-                    'url': link,
+                    'availability': 'check_page',
+                    'url': href,
                     'seller': 'raspberrypi.com',
-                    'confidence': 4
+                    'confidence': 5
                 })
-                log(f"    → MATCHED: {name} (unknown stock, official)")
-                print(f"NORMALIZER MATCH HTML: {name}")
+                log(f"    → MATCHED: {name[:60]} | URL: {href}")
+                matched += 1
+        log(f"  → RPi official: {matched} products extracted")
 
     # 2. Shopify JSON
     elif 'shopify_json' in source_name or 'pimoroni' in source_name:
