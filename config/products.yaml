@@ -1,38 +1,102 @@
-# Products to monitor
-products:
-  raspberry_pi_5:
-    name: "Raspberry Pi 5"
-    variants: ["4GB", "8GB"]
-    baseline_price_usd: 60
-    tier: 1
+# Variant-Specific Targets - 2026 Realistic Baselines (Memory Hike Adjusted)
+# baseline_price = current fair/MSRP range midpoint
 
-  raspberry_pi_4:
-    name: "Raspberry Pi 4"
-    variants: ["2GB", "4GB", "8GB"]
-    baseline_price_usd: 45
-    tier: 1
+variants:
+  raspberry_pi_5_4gb:
+    full_name: Raspberry Pi 5 4GB
+    keywords: ['pi 5 4gb', 'raspberry pi 5 4gb']
+    board_family: raspberry_pi
+    ram_gb: 4
+    baseline_price: 98
+    high_memory: false
+    target_use: general
 
-  radxa_rock_5b:
-    name: "Radxa Rock 5B"
-    variants: ["8GB", "16GB"]
-    baseline_price_usd: 150
-    tier: 1
+  raspberry_pi_5_8gb:
+    full_name: Raspberry Pi 5 8GB
+    keywords: ['pi 5 8gb', 'raspberry pi 5 8gb']
+    board_family: raspberry_pi
+    ram_gb: 8
+    baseline_price: 148
+    high_memory: false
+    target_use: makers
 
-  orange_pi_5:
-    name: "Orange Pi 5"
-    variants: ["4GB", "8GB", "16GB", "32GB"]
-    baseline_price_usd: 80
-    tier: 1
+  raspberry_pi_5_16gb:
+    full_name: Raspberry Pi 5 16GB
+    keywords: ['pi 5 16gb', 'raspberry pi 5 16gb']
+    board_family: raspberry_pi
+    ram_gb: 16
+    baseline_price: 285
+    high_memory: true
+    target_use: ai/high-memory
 
-  jetson_orin:
-    name: "Jetson Orin"
-    variants: ["8GB", "16GB", "32GB"]
-    baseline_price_usd: 500
-    tier: 1
+  radxa_rock_5b_8gb:
+    full_name: Radxa ROCK 5B 8GB
+    keywords: ['rock 5b 8gb']
+    board_family: radxa
+    ram_gb: 8
+    baseline_price: 160
+    high_memory: false
+    target_use: general
 
-memory_preferences:
-  - "32GB"
-  - "16GB"
-  - "8GB"
-  - "4GB"
-strict_mode: false
+  radxa_rock_5b_16gb:
+    full_name: Radxa ROCK 5B 16GB
+    keywords: ['rock 5b 16gb']
+    board_family: radxa
+    ram_gb: 16
+    baseline_price: 160
+    high_memory: true
+    target_use: ai/server
+
+  radxa_rock_5b_32gb:
+    full_name: Radxa ROCK 5B 32GB
+    keywords: ['rock 5b 32gb', 'rock5b 32g']
+    board_family: radxa
+    ram_gb: 32
+    baseline_price: 250
+    high_memory: true
+    target_use: ai/llm-server PRIORITY
+
+  orange_pi_5_plus_16gb:
+    full_name: Orange Pi 5 Plus 16GB
+    keywords: ['orange pi 5 plus 16gb']
+    board_family: orange_pi
+    ram_gb: 16
+    baseline_price: 220
+    high_memory: true
+    target_use: ai
+
+  orange_pi_5_plus_32gb:
+    full_name: Orange Pi 5 Plus 32GB
+    keywords: ['orange pi 5 plus 32gb']
+    board_family: orange_pi
+    ram_gb: 32
+    baseline_price: 310
+    high_memory: true
+    target_use: ai/llm
+
+  jetson_orin_nano_8gb:
+    full_name: NVIDIA Jetson Orin Nano 8GB
+    keywords: ['jetson orin nano 8gb']
+    board_family: jetson
+    ram_gb: 8
+    baseline_price: 499
+    high_memory: false
+    target_use: robotics/ai
+
+  rock_5b_64gb_future:
+    full_name: Radxa ROCK 5B 64GB (2026)
+    keywords: ['rock 5b 64gb']
+    board_family: radxa
+    ram_gb: 64
+    baseline_price: 380
+    high_memory: true
+    target_use: llm-server
+
+  pi_5_32gb_future:
+    full_name: Raspberry Pi 5 32GB (future)
+    keywords: ['pi 5 32gb']
+    board_family: raspberry_pi
+    ram_gb: 32
+    baseline_price: 220
+    high_memory: true
+    target_use: ai/llm
